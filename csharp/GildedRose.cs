@@ -26,7 +26,7 @@ namespace csharp
                 {
                     if (item.Quality > 0)
                     {
-                        item.Quality = item.Quality - 1;
+                        item.Quality--;
                     }
                 }
                 // Check if the item's quality increases with time (aged brie or backstage pass)
@@ -35,7 +35,7 @@ namespace csharp
                 {
                     if (item.Quality < 50)
                     {
-                        item.Quality = item.Quality + 1;
+                        item.Quality++;
 
                         // Backstage pass quality goes up faster as concert approaches
                         // If 10 days or less are left and quality can go higher, it is increased by 1 (adding up to +2).
@@ -46,7 +46,7 @@ namespace csharp
                             {
                                 if (item.Quality < 50)
                                 {
-                                    item.Quality = item.Quality + 1;
+                                    item.Quality++;
                                 }
                             }
 
@@ -54,7 +54,7 @@ namespace csharp
                             {
                                 if (item.Quality < 50)
                                 {
-                                    item.Quality = item.Quality + 1;
+                                    item.Quality++;
                                 }
                             }
                         }
@@ -77,13 +77,13 @@ namespace csharp
                         {
                             if (item.Quality > 0)
                             {
-                                item.Quality = item.Quality - 1;
+                                item.Quality--;
                             }
                         }
                         // If a backstage pass has expired, its quality goes to 0.
                         else
                         {
-                            item.Quality = item.Quality - item.Quality;
+                            item.Quality = 0;
                         }
                     }
                     // If aged brie quality can go higher, it is increased by 1 (adding up to +2).
@@ -91,7 +91,7 @@ namespace csharp
                     {
                         if (item.Quality < 50)
                         {
-                            item.Quality = item.Quality + 1;
+                            item.Quality++;
                         }
                     }
                 }
