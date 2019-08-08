@@ -19,12 +19,14 @@ namespace csharp
                 if (item.Name == "Sulfuras, Hand of Ragnaros")
                     continue;
 
+                // SellIn value decrements for all items (except Sulfuras) regardless of quality.
+                item.SellIn--;
 
                 // Check if this item's quality reduces with time (normal item or conjured item)
                 // If quality can go lower (hasn't reached 0 yet), it is reduced by 1
                 if (item.Name != "Aged Brie" && item.Name != "Backstage passes to a TAFKAL80ETC concert")
                 {
-                    if (item.Quality > 0)
+                    if (QualityCanGoLower(item.Quality))
                     {
                         item.Quality--;
                     }
@@ -33,7 +35,7 @@ namespace csharp
                 // If quality can go higher (hasn't reached 50 yet), it is increased by 1
                 else
                 {
-                    if (item.Quality < 50)
+                    if (QualityCanGoHigher(item.Quality))
                     {
                         item.Quality++;
 
@@ -42,17 +44,17 @@ namespace csharp
                         // If 5 days or less are left and quality can go higher, it is increased by 1 again (adding up to +3).
                         if (item.Name == "Backstage passes to a TAFKAL80ETC concert")
                         {
-                            if (item.SellIn < 11)
+                            if (item.SellIn < 10)
                             {
-                                if (item.Quality < 50)
+                                if (QualityCanGoHigher(item.Quality))
                                 {
                                     item.Quality++;
                                 }
                             }
 
-                            if (item.SellIn < 6)
+                            if (item.SellIn < 5)
                             {
-                                if (item.Quality < 50)
+                                if (QualityCanGoHigher(item.Quality))
                                 {
                                     item.Quality++;
                                 }
@@ -60,9 +62,6 @@ namespace csharp
                         }
                     }
                 }
-                // SellIn value decrements for any type of item,
-                // except Sulfuras, but it was eliminated at the start of the method.
-                item.SellIn --;
 
                 // If item has reached the sell by date, the quality:
                 // - reduces by double for normal and conjured items,
@@ -75,7 +74,7 @@ namespace csharp
                     {
                         if (item.Name != "Backstage passes to a TAFKAL80ETC concert")
                         {
-                            if (item.Quality > 0)
+                            if (QualityCanGoLower(item.Quality))
                             {
                                 item.Quality--;
                             }
@@ -89,13 +88,23 @@ namespace csharp
                     // If aged brie quality can go higher, it is increased by 1 (adding up to +2).
                     else
                     {
-                        if (item.Quality < 50)
+                        if (QualityCanGoHigher(item.Quality))
                         {
                             item.Quality++;
                         }
                     }
                 }
             }
+        }
+
+        private bool QualityCanGoHigher(int quality)
+        {
+            return quality < 50;
+        }
+
+        private bool QualityCanGoLower(int quality)
+        {
+            return quality > 0;
         }
     }
 }
