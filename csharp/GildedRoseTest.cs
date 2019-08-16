@@ -6,9 +6,6 @@ namespace csharp
     [TestFixture]
     public class GildedRoseTest
     {
-        private int QualityUpperLimit = 50;
-        private int QualityLowerLimit = 0;
-
         [Test]
         public void foo()
         {
@@ -59,12 +56,12 @@ namespace csharp
         [Test]
         public void UpdateQuality_NormalItemQualityLowerLimitExceededBeforeSellIn_QualityStaysAtLimit()
         {
-            IList<Item> Items = new List<Item> { new Item { Name = "Item", SellIn = 5, Quality = QualityLowerLimit } };
+            IList<Item> Items = new List<Item> { new Item { Name = "Item", SellIn = 5, Quality = 0 } };
             GildedRose app = new GildedRose(Items);
 
             app.UpdateQuality();
 
-            Assert.AreEqual(QualityLowerLimit, Items[0].Quality);
+            Assert.AreEqual(0, Items[0].Quality);
         }
 
         [Test]
@@ -75,7 +72,7 @@ namespace csharp
 
             app.UpdateQuality();
 
-            Assert.AreEqual(QualityLowerLimit, Items[0].Quality);
+            Assert.AreEqual(0, Items[0].Quality);
         }
 
         // Aged Brie
@@ -119,25 +116,24 @@ namespace csharp
         [Test]
         public void UpdateQuality_AgedBrieQualityUpperLimitExceededBeforeSellIn_QualityStaysAtLimit()
         {
-            IList<Item> Items = new List<Item> { new Item { Name = GildedRose.BRIE, SellIn = 5, Quality = QualityUpperLimit } };
+            IList<Item> Items = new List<Item> { new Item { Name = GildedRose.BRIE, SellIn = 5, Quality = 50 } };
             GildedRose app = new GildedRose(Items);
 
             app.UpdateQuality();
 
-            Assert.AreEqual(QualityUpperLimit, Items[0].Quality);
+            Assert.AreEqual(50, Items[0].Quality);
         }
 
-        [Test]
-        public void UpdateQuality_AgedBrieQualityUpperLimitExceededAfterSellIn_QualityStaysAtLimit()
+        [Test, Combinatorial]
+        public void UpdateQuality_AgedBrieQualityUpperLimitExceededAfterSellIn_QualityStaysAtLimit(
+            [Values(50, 49)] int testQuality)
         {
-            IList<Item> Items = new List<Item> { new Item { Name = GildedRose.BRIE, SellIn = 0, Quality = QualityUpperLimit },
-                                                 new Item { Name = GildedRose.BRIE, SellIn = 0, Quality = QualityUpperLimit - 1 }};
+            IList<Item> Items = new List<Item> { new Item { Name = GildedRose.BRIE, SellIn = 0, Quality = testQuality}};
             GildedRose app = new GildedRose(Items);
 
             app.UpdateQuality();
 
-            Assert.AreEqual(QualityUpperLimit, Items[0].Quality);
-            Assert.AreEqual(QualityUpperLimit, Items[1].Quality);
+            Assert.AreEqual(50, Items[0].Quality);
         }
 
         // Sulfuras
@@ -179,46 +175,43 @@ namespace csharp
             Assert.AreEqual(startingSellIn, Items[0].SellIn + 1);
         }
 
-        [Test]
-        public void UpdateQuality_BackstagePassQualityMoreThanTenDaysBeforeConcert_IncreasesByOne()
+        [Test, Combinatorial]
+        public void UpdateQuality_BackstagePassQualityMoreThanTenDaysBeforeConcert_IncreasesByOne(
+            [Values(18, 11)] int testSellIn)
         {
             var startingQuality = 10;
-            IList<Item> Items = new List<Item> { new Item { Name = GildedRose.BACKSTAGE, SellIn = 18, Quality = startingQuality },
-                                                 new Item { Name = GildedRose.BACKSTAGE, SellIn = 11, Quality = startingQuality } };
+            IList<Item> Items = new List<Item> { new Item { Name = GildedRose.BACKSTAGE, SellIn = testSellIn, Quality = startingQuality }};
             GildedRose app = new GildedRose(Items);
 
             app.UpdateQuality();
 
             Assert.AreEqual(startingQuality, Items[0].Quality - 1);
-            Assert.AreEqual(startingQuality, Items[1].Quality - 1);
         }
 
-        [Test]
-        public void UpdateQuality_BackstagePassQualityTenDaysOrLessBeforeConcert_IncreasesByTwo()
+        [Test, Combinatorial]
+        public void UpdateQuality_BackstagePassQualityTenDaysOrLessBeforeConcert_IncreasesByTwo(
+            [Values(10, 6)] int testSellIn)
         {
             var startingQuality = 10;
-            IList<Item> Items = new List<Item> { new Item { Name = GildedRose.BACKSTAGE, SellIn = 10, Quality = startingQuality },
-                                                 new Item { Name = GildedRose.BACKSTAGE, SellIn = 6, Quality = startingQuality } };
+            IList<Item> Items = new List<Item> { new Item { Name = GildedRose.BACKSTAGE, SellIn = testSellIn, Quality = startingQuality } };
             GildedRose app = new GildedRose(Items);
 
             app.UpdateQuality();
 
             Assert.AreEqual(startingQuality, Items[0].Quality - 2);
-            Assert.AreEqual(startingQuality, Items[1].Quality - 2);
         }
 
-        [Test]
-        public void UpdateQuality_BackstagePassQualityFiveDaysOrLessBeforeConcert_IncreasesByThree()
+        [Test, Combinatorial]
+        public void UpdateQuality_BackstagePassQualityFiveDaysOrLessBeforeConcert_IncreasesByThree(
+            [Values(1, 5)] int testSellIn)
         {
             var startingQuality = 10;
-            IList<Item> Items = new List<Item> { new Item { Name = GildedRose.BACKSTAGE, SellIn = 5, Quality = startingQuality },
-                                                 new Item { Name = GildedRose.BACKSTAGE, SellIn = 1, Quality = startingQuality } };
+            IList<Item> Items = new List<Item> { new Item { Name = GildedRose.BACKSTAGE, SellIn = testSellIn, Quality = startingQuality }};
             GildedRose app = new GildedRose(Items);
 
             app.UpdateQuality();
 
             Assert.AreEqual(startingQuality, Items[0].Quality - 3);
-            Assert.AreEqual(startingQuality, Items[1].Quality - 3);
         }
 
         [Test]
@@ -235,40 +228,36 @@ namespace csharp
         [Test]
         public void UpdateQuality_BackstagePassQualityUpperLimitExceededWhenMoreThanTenDaysBeforeConcert_QualityStaysAtLimit()
         {
-            IList<Item> Items = new List<Item> { new Item { Name = GildedRose.BACKSTAGE, SellIn = 11, Quality = QualityUpperLimit } };
+            IList<Item> Items = new List<Item> { new Item { Name = GildedRose.BACKSTAGE, SellIn = 11, Quality = 50 } };
             GildedRose app = new GildedRose(Items);
 
             app.UpdateQuality();
 
-            Assert.AreEqual(QualityUpperLimit, Items[0].Quality);
+            Assert.AreEqual(50, Items[0].Quality);
         }
 
-        [Test]
-        public void UpdateQuality_BackstagePassQualityUpperLimitExceededWhenTenOrLessDaysBeforeConcert_QualityStaysAtLimit()
+        [Test, Combinatorial]
+        public void UpdateQuality_BackstagePassQualityUpperLimitExceededWhenTenOrLessDaysBeforeConcert_QualityStaysAtLimit(
+            [Values (50, 49)] int testQuality)
         {
-            IList<Item> Items = new List<Item> { new Item { Name = GildedRose.BACKSTAGE, SellIn = 10, Quality = QualityUpperLimit - 1 },
-                                                 new Item { Name = GildedRose.BACKSTAGE, SellIn = 6, Quality = QualityUpperLimit } };
+            IList<Item> Items = new List<Item> { new Item { Name = GildedRose.BACKSTAGE, SellIn = 10, Quality = testQuality }};
             GildedRose app = new GildedRose(Items);
 
             app.UpdateQuality();
 
-            Assert.AreEqual(QualityUpperLimit, Items[0].Quality);
-            Assert.AreEqual(QualityUpperLimit, Items[1].Quality);
+            Assert.AreEqual(50, Items[0].Quality);
         }
 
-        [Test]
-        public void UpdateQuality_BackstagePassQualityUpperLimitExceededWhenFiveOrLessDaysBeforeConcert_QualityStaysAtLimit()
+        [Test, Combinatorial]
+        public void UpdateQuality_BackstagePassQualityUpperLimitExceededWhenFiveOrLessDaysBeforeConcert_QualityStaysAtLimit(
+            [Values (50, 49, 48)] int testQuality)
         {
-            IList<Item> Items = new List<Item> { new Item { Name = GildedRose.BACKSTAGE, SellIn = 5, Quality = QualityUpperLimit - 2 },
-                                                 new Item { Name = GildedRose.BACKSTAGE, SellIn = 3, Quality = QualityUpperLimit - 1 },
-                                                 new Item { Name = GildedRose.BACKSTAGE, SellIn = 1, Quality = QualityUpperLimit }, };
+            IList<Item> Items = new List<Item> { new Item { Name = GildedRose.BACKSTAGE, SellIn = 5, Quality = testQuality} };
             GildedRose app = new GildedRose(Items);
 
             app.UpdateQuality();
 
-            Assert.AreEqual(QualityUpperLimit, Items[0].Quality);
-            Assert.AreEqual(QualityUpperLimit, Items[1].Quality);
-            Assert.AreEqual(QualityUpperLimit, Items[2].Quality);
+            Assert.AreEqual(50, Items[0].Quality);
         }
 
         // Conjured Items
@@ -309,30 +298,28 @@ namespace csharp
             Assert.AreEqual(startingQuality, Items[0].Quality + 4);
         }
 
-        [Test]
-        public void UpdateQuality_ConjuredItemQualityLowerLimitExceededBeforeSellIn_QualityStaysAtLimit()
+        [Test, Combinatorial]
+        public void UpdateQuality_ConjuredItemQualityLowerLimitExceededBeforeSellIn_QualityStaysAtLimit(
+            [Values (0, 1)] int testQuality)
         {
-            IList<Item> Items = new List<Item> { new Item { Name = GildedRose.CONJURED, SellIn = 5, Quality = QualityLowerLimit },
-                                                 new Item { Name = GildedRose.CONJURED, SellIn = 5, Quality = QualityLowerLimit + 1 }};
+            IList<Item> Items = new List<Item> { new Item { Name = GildedRose.CONJURED, SellIn = 5, Quality = testQuality }};
             GildedRose app = new GildedRose(Items);
 
             app.UpdateQuality();
 
-            Assert.AreEqual(QualityLowerLimit, Items[0].Quality);
-            Assert.AreEqual(QualityLowerLimit, Items[1].Quality);
+            Assert.AreEqual(0, Items[0].Quality);
         }
 
-        [Test]
-        public void UpdateQuality_ConjureditemQualityLowerLimitExceededAfterSellIn_QualityStaysAtLimit()
+        [Test, Combinatorial]
+        public void UpdateQuality_ConjuredItemQualityLowerLimitExceededAfterSellIn_QualityStaysAtLimit(
+            [Values (0, 1, 2, 3)] int testQuality)
         {
-            IList<Item> Items = new List<Item> { new Item { Name = GildedRose.CONJURED, SellIn = 0, Quality = QualityLowerLimit },
-                                                 new Item { Name = GildedRose.CONJURED, SellIn = 0, Quality = QualityLowerLimit + 3 }};
+            IList<Item> Items = new List<Item> { new Item { Name = GildedRose.CONJURED, SellIn = 0, Quality = testQuality }};
             GildedRose app = new GildedRose(Items);
 
             app.UpdateQuality();
 
-            Assert.AreEqual(QualityLowerLimit, Items[0].Quality);
-            Assert.AreEqual(QualityLowerLimit, Items[1].Quality);
+            Assert.AreEqual(0, Items[0].Quality);
         }
     }
 }
