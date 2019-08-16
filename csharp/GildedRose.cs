@@ -7,11 +7,6 @@ namespace csharp
     {
         IList<Item> Items;
 
-        public const string BRIE = "Aged Brie";
-        public const string BACKSTAGE = "Backstage passes to a TAFKAL80ETC concert";
-        public const string SUFURAS = "Sulfuras, Hand of Ragnaros";
-        public const string CONJURED = "Conjured Mana Cake";
-
         public GildedRose(IList<Item> Items)
         {
             this.Items = Items;
@@ -23,7 +18,7 @@ namespace csharp
             {
                 // Neither the quality nor the sellIn of Sulfuras items changes.
                 // That's why the loop can immediately move on to the next iteration.
-                if (item.Name == SUFURAS)
+                if (item.Name == "Sulfuras, Hand of Ragnaros")
                     continue;
 
                 // SellIn value decrements for all items (except Sulfuras) regardless of quality.
@@ -38,17 +33,17 @@ namespace csharp
                 // Determine item type from the start (to avoid checking it multiple times) and adjust quality accordingly.
                 switch (item.Name)
                 {
-                    case BRIE:
+                    case "Aged Brie":
                         {
                             BrieChangeQuality(item, itemExpired);
                             break;
                         }
-                    case BACKSTAGE:
+                    case "Backstage passes to a TAFKAL80ETC concert":
                         {
                             BackstagePassChangeQuality(item, itemExpired);
                             break;
                         }
-                    case CONJURED:
+                    case "Conjured Mana Cake":
                         {
                             ConjuredChangeQuality(item, itemExpired);
                             break;
