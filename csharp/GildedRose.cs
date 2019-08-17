@@ -21,36 +21,29 @@ namespace csharp
                 if (item.Name == "Sulfuras, Hand of Ragnaros")
                     continue;
 
-                // SellIn value decrements for all items (except Sulfuras) regardless of quality.
-                item.SellIn--;
-                
-                bool itemExpired = false;
-                
-                if (item.SellIn < 0)
-                    itemExpired = true;
-
-
                 // Determine item type from the start (to avoid checking it multiple times) and adjust quality accordingly.
                 switch (item.Name)
                 {
+
+                    // Increases in quality the older it gets (by 1 before SellIn, by 2 after).
                     case "Aged Brie":
                         {
-                            BrieChangeQuality(item, itemExpired);
+                            BrieChangeQuality(item);
                             break;
                         }
                     case "Backstage passes to a TAFKAL80ETC concert":
                         {
-                            BackstagePassChangeQuality(item, itemExpired);
+                            BackstagePassChangeQuality(item);
                             break;
                         }
                     case "Conjured Mana Cake":
                         {
-                            ConjuredChangeQuality(item, itemExpired);
+                            ConjuredChangeQuality(item);
                             break;
                         }
                     default:
                         {
-                            NormalItemChangeQuality(item, itemExpired);
+                            NormalItemChangeQuality(item);
                             break;
                         }
                 }
@@ -63,18 +56,19 @@ namespace csharp
                  * In the main() method, items then could be created using the derived class constructor (e.g. Item item = new AgedBrie())
                  * and in the UpdateQuality() method item.ChangeQuality() could be called for each element in the list.
                  */
-                
+
             }
-            
+
         }
 
-        // Increases in quality the older it gets (by 1 before SellIn, by 2 after).
-        private void BrieChangeQuality(Item item, bool expired)
+        // Increases in quality the older it gets(by 1 before SellIn, by 2 after).
+        private void BrieChangeQuality(Item item)
         {
-            if (QualityCanGoHigher(item.Quality))
+            item.SellIn--;
+            if (item.Quality < 50)
             {
                 item.Quality++;
-                if (expired && QualityCanGoHigher(item.Quality))
+                if (item.SellIn < 0 && item.Quality < 50)
                     item.Quality++;
             }
         }
@@ -84,31 +78,30 @@ namespace csharp
         // -by 2 when there are 10 days or less,
         // -by 3 when there are 5 days or less but.
         // Quality drops to 0 after the concert.
-        private void BackstagePassChangeQuality(Item item, bool expired)
+        private void BackstagePassChangeQuality(Item item)
         {
-            if (expired)
-                item.Quality = 0;
-            else
+            if (item.Quality < 50)
             {
-                if (QualityCanGoHigher(item.Quality))
-                {
+                item.Quality++;
+                if (item.SellIn <= 10 && item.Quality < 50)
                     item.Quality++;
-                    if (item.SellIn < 10 && QualityCanGoHigher(item.Quality))
-                        item.Quality++;
-                    if (item.SellIn < 5 && QualityCanGoHigher(item.Quality))
-                        item.Quality++;
-                }
+                if (item.SellIn <= 5 && item.Quality < 50)
+                    item.Quality++;
             }
+            item.SellIn--;
+            if (item.SellIn < 0)
+                item.Quality = 0;
         }
 
         // Degrades in quality twice as fast as regular items (by 2 before SellIn, by 4 after)
-        private void ConjuredChangeQuality(Item item, bool expired)
+        private void ConjuredChangeQuality(Item item)
         {
             int qualityChange;
-            if (expired) qualityChange = 4;
+            item.SellIn--;
+            if (item.SellIn < 0) qualityChange = 4;
             else qualityChange = 2;
 
-            while (QualityCanGoLower(item.Quality) && qualityChange > 0)
+            while (item.Quality > 0 && qualityChange > 0)
             {
                 item.Quality--;
                 qualityChange--;
@@ -116,24 +109,15 @@ namespace csharp
         }
 
         // Degrades in quality the older it gets (by 1 before SellIn, by 2 after).
-        private void NormalItemChangeQuality(Item item, bool expired)
+        private void NormalItemChangeQuality(Item item)
         {
-            if (QualityCanGoLower(item.Quality))
+            item.SellIn--;
+            if (item.Quality > 0)
             {
                 item.Quality--;
-                if (expired && QualityCanGoLower(item.Quality))
+                if (item.SellIn < 0 && item.Quality > 0)
                     item.Quality--;
             }
-        }
-
-        private bool QualityCanGoHigher(int quality)
-        {
-            return quality < 50;
-        }
-
-        private bool QualityCanGoLower(int quality)
-        {
-            return quality > 0;
         }
     }
 }
